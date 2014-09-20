@@ -11,7 +11,7 @@ import org.cocos2d.nodes.CCAnimation;
 import org.cocos2d.nodes.CCDirector;
 import org.cocos2d.nodes.CCSprite;
 import org.cocos2d.nodes.CCSpriteFrame;
-import org.cocos2d.transitions.CCJumpZoomTransition;
+import org.cocos2d.transitions.CCFadeTransition;
 
 /**
  * 工具类
@@ -63,7 +63,8 @@ public class CommonUtils {
 		//添加图层
 		scene.addChild(layer);
 		//将场景进行动画包装
-		CCJumpZoomTransition transition = CCJumpZoomTransition.transition(2, scene);
+		//		CCJumpZoomTransition transition = CCJumpZoomTransition.transition(2, scene);
+		CCFadeTransition transition = CCFadeTransition.transition(2, scene);
 		//替换场景
 		director.replaceScene(transition);
 	}
