@@ -1,5 +1,7 @@
 package net.dxs.plantsvszombies;
 
+import net.dxs.plantsvszombies.layer.FightLayer;
+import net.dxs.plantsvszombies.layer.MenuLayer;
 import net.dxs.plantsvszombies.layer.WelcomeLayer;
 
 import org.cocos2d.layers.CCScene;
@@ -30,7 +32,9 @@ public class MainActivity extends Activity {
 		//获得一个场景
 		CCScene scene = CCScene.node();
 
-		WelcomeLayer layer = new WelcomeLayer();
+		//		WelcomeLayer layer = new WelcomeLayer();
+		MenuLayer layer = new MenuLayer();
+		//		FightLayer layer = new FightLayer();
 
 		//添加图层
 		scene.addChild(layer);

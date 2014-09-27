@@ -1,5 +1,7 @@
 package net.dxs.plantsvszombies.layer;
 
+import net.dxs.plantsvszombies.utils.CommonUtils;
+
 import org.cocos2d.menus.CCMenu;
 import org.cocos2d.menus.CCMenuItemSprite;
 import org.cocos2d.nodes.CCSprite;
@@ -35,5 +37,6 @@ public class MenuLayer extends BaseLayer {
 
 	public void click(Object object) {
 		System.out.println("被点击了");
+		CommonUtils.changeLayer(new FightLayer());
 	}
 }
