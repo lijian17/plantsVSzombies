@@ -7,12 +7,15 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import net.dxs.plantsvszombies.bean.ShowZombies;
 import net.dxs.plantsvszombies.utils.CommonUtils;
 
+import org.cocos2d.actions.base.CCAction;
+import org.cocos2d.actions.base.CCFiniteTimeAction;
 import org.cocos2d.actions.instant.CCCallFunc;
 import org.cocos2d.actions.interval.CCDelayTime;
 import org.cocos2d.actions.interval.CCMoveBy;
 import org.cocos2d.actions.interval.CCMoveTo;
 import org.cocos2d.actions.interval.CCSequence;
 import org.cocos2d.layers.CCTMXTiledMap;
+import org.cocos2d.nodes.CCDirector;
 import org.cocos2d.nodes.CCSprite;
 import org.cocos2d.types.CGPoint;
 import org.cocos2d.types.CGRect;
@@ -21,6 +24,7 @@ import android.view.MotionEvent;
 
 public class FightLayer extends BaseLayer {
 
+	private static final int TAG_READY = 10;
 	/** 游戏地图 **/
 	private CCTMXTiledMap gameMap;
 	/** 植物集合 **/
@@ -115,13 +119,17 @@ public class FightLayer extends BaseLayer {
 	}
 
 	private boolean isDel;
+	private List<ShowZombies> mArr_showZombies;
 
 	@Override
 	public boolean ccTouchesBegan(MotionEvent event) {
 		CGPoint touchPoint = this.convertTouchToNodeSpace(event);
 		if (CGRect.containsPoint(chooseSprite.getBoundingBox(), touchPoint)) {//触摸点在植物选择框内
 			if (CGRect.containsPoint(startGame.getBoundingBox(), touchPoint)) {
-				System.out.println("一起摇滚吧");
+				//System.out.println("一起摇滚吧");
+				if (mArr_chose.size() > 0) {
+					preGame();
+				}
 			} else {
 				for (ShowPlant plant : mArr_choose) {
 					if (mArr_chose.size() < 5) {//如果已选择植物＜5,就可以继续选择
@@ -158,23 +166,74 @@ public class FightLayer extends BaseLayer {
 	}
 
 	/**
+	 * 游戏开始前的工作
+	 */
+	private void preGame() {
+		this.setIsTouchEnabled(false);
+
+		// 1 玩家已有植物的容器 回收
+		chooseSprite.removeSelf();
+
+		// 2地图平移
+		CCMoveBy by = CCMoveBy.action(2, ccp(gameMap.getContentSize().width - winSize.width, 0));
+		CCSequence sequence = CCSequence.actions(by, CCCallFunc.action(this, "ready"));
+		gameMap.runAction(sequence);
+
+		// 3展示用的僵尸回收
+		for (ShowZombies zombies : mArr_showZombies) {
+			zombies.removeSelf();
+		}
+		mArr_showZombies.clear();
+		mArr_showZombies = null;
+
+		// 4 缩放玩家已选择植物的容器
+		choseSprite.setScale(0.65f);
+
+		// 5 重新添加玩家已选择的植物
+		for (ShowPlant plant : mArr_chose) {
+			plant.getDefaultSprite().setScale(0.65f);
+			plant.getDefaultSprite().setPosition(plant.getDefaultSprite().getPosition().x * 0.65f, plant.getDefaultSprite().getPosition().y + (CCDirector.sharedDirector().getWinSize().height - plant.getDefaultSprite().getPosition().y) * 0.35f);// 设置坐标
+			this.addChild(plant.getDefaultSprite());
+		}
+	}
+
+	public void ready() {
+		// 序列帧的播放
+		CCSprite ready = CCSprite.sprite("image/fight/startready_01.png");
+		ready.setPosition(winSize.width / 2, winSize.height / 2);
+		this.addChild(ready, 0, TAG_READY);
+
+		CCAction animate = CommonUtils.animate("image/fight/startready_%02d.png", 3, false, 0.5f);
+		CCSequence.actions((CCFiniteTimeAction) animate, CCCallFunc.action(this, "startGame"));
+		ready.runAction(animate);
+	}
+
+	/**
+	 * 对战的开始
+	 */
+	public void startGame() {
+		this.getChildByTag(TAG_READY).removeSelf();
+		this.setIsTouchEnabled(true);
+	}
+
+	/**
 	 * 加载展示用的僵尸
 	 */
 	private void loadShowZombies() {
-		List<ShowZombies> showZombies = new ArrayList<ShowZombies>();
+		mArr_showZombies = new ArrayList<ShowZombies>();
 
 		List<CGPoint> points = CommonUtils.getMapPoint(gameMap, "zombies");
 		for (int i = 0; i < points.size(); i++) {
-			if (i % 2 == 0) {
-				ShowZombies zombies = new ShowZombies();
-				zombies.setPosition(points.get(i));
-				gameMap.addChild(zombies);
-				showZombies.add(zombies);
-			} else {
-				ShowNut nut = new ShowNut();
-				nut.setPosition(points.get(i));
-				gameMap.addChild(nut);
-			}
+			//			if (i % 2 == 0) {
+			ShowZombies zombies = new ShowZombies();
+			zombies.setPosition(points.get(i));
+			gameMap.addChild(zombies);
+			mArr_showZombies.add(zombies);
+			//			} else {
+			//				ShowNut nut = new ShowNut();
+			//				nut.setPosition(points.get(i));
+			//				gameMap.addChild(nut);
+			//			}
 		}
 	}
 

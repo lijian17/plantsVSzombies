@@ -39,12 +39,16 @@ public class CommonUtils {
 	 * @return 序列帧的动作
 	 */
 	public static CCAction animate(String path, int num, boolean forever) {
+		return animate(path, num, forever, 0.2f);
+	}
+
+	public static CCAction animate(String path, int num, boolean forever, float time) {
 		ArrayList<CCSpriteFrame> frames = new ArrayList<CCSpriteFrame>();
 		for (int i = 1; i <= num; i++) {
 			CCSpriteFrame frame = CCSprite.sprite(String.format(path, i)).displayedFrame();
 			frames.add(frame);
 		}
-		CCAnimation anim = CCAnimation.animation("", 0.2f, frames);
+		CCAnimation anim = CCAnimation.animation("", time, frames);
 		if (forever) {
 			CCAnimate animate = CCAnimate.action(anim);
 			CCRepeatForever repeatForever = CCRepeatForever.action(animate);
@@ -98,4 +102,5 @@ public class CommonUtils {
 		}
 		return cgPoints;
 	}
+
 }

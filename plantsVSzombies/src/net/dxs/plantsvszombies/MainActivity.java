@@ -1,8 +1,6 @@
 package net.dxs.plantsvszombies;
 
-import net.dxs.plantsvszombies.layer.FightLayer;
 import net.dxs.plantsvszombies.layer.MenuLayer;
-import net.dxs.plantsvszombies.layer.WelcomeLayer;
 
 import org.cocos2d.layers.CCScene;
 import org.cocos2d.nodes.CCDirector;
