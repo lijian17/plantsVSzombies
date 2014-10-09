@@ -1,5 +1,6 @@
 package net.dxs.plantsvszombies.layer;
 
+import net.dxs.plantsvszombies.R;
 import net.dxs.plantsvszombies.utils.CommonUtils;
 
 import org.cocos2d.actions.base.CCAction;
@@ -7,6 +8,7 @@ import org.cocos2d.actions.instant.CCCallFunc;
 import org.cocos2d.actions.instant.CCHide;
 import org.cocos2d.actions.interval.CCDelayTime;
 import org.cocos2d.actions.interval.CCSequence;
+import org.cocos2d.nodes.CCDirector;
 import org.cocos2d.nodes.CCSprite;
 import org.cocos2d.types.CGRect;
 
@@ -20,6 +22,7 @@ public class WelcomeLayer extends BaseLayer {
 	private CCSprite start;
 
 	public WelcomeLayer() {
+		soundEngine.playSound(CCDirector.theApp, R.raw.day, true);
 		init();
 	}
 
@@ -93,6 +96,7 @@ public class WelcomeLayer extends BaseLayer {
 	@Override
 	public boolean ccTouchesEnded(MotionEvent event) {
 		if (CGRect.containsPoint(start.getBoundingBox(), this.convertTouchToNodeSpace(event))) {
+			soundEngine.playEffect(CCDirector.theApp, R.raw.onclick);
 			gotoMenu();
 		}
 		return super.ccTouchesEnded(event);

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import net.dxs.plantsvszombies.R;
 import net.dxs.plantsvszombies.bean.ShowZombies;
 import net.dxs.plantsvszombies.utils.CommonUtils;
 
@@ -214,6 +215,7 @@ public class FightLayer extends BaseLayer {
 	public void startGame() {
 		this.getChildByTag(TAG_READY).removeSelf();
 		this.setIsTouchEnabled(true);
+		soundEngine.playSound(CCDirector.theApp, R.raw.day, true);
 	}
 
 	/**

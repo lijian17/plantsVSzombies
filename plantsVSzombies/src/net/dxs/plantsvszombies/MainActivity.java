@@ -1,6 +1,7 @@
 package net.dxs.plantsvszombies;
 
 import net.dxs.plantsvszombies.layer.MenuLayer;
+import net.dxs.plantsvszombies.layer.WelcomeLayer;
 
 import org.cocos2d.layers.CCScene;
 import org.cocos2d.nodes.CCDirector;
@@ -11,6 +12,8 @@ import android.os.Bundle;
 
 public class MainActivity extends Activity {
 
+	private CCDirector director;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -18,8 +21,7 @@ public class MainActivity extends Activity {
 		CCGLSurfaceView surfaceView = new CCGLSurfaceView(this);
 		setContentView(surfaceView);
 
-		//获得一个导演
-		CCDirector director = CCDirector.sharedDirector();
+		director = CCDirector.sharedDirector();
 		director.attachInView(surfaceView);//开启绘制线程
 
 		director.setDeviceOrientation(CCDirector.kCCDeviceOrientationLandscapeLeft);
@@ -30,8 +32,8 @@ public class MainActivity extends Activity {
 		//获得一个场景
 		CCScene scene = CCScene.node();
 
-		//		WelcomeLayer layer = new WelcomeLayer();
-		MenuLayer layer = new MenuLayer();
+		WelcomeLayer layer = new WelcomeLayer();
+		//		MenuLayer layer = new MenuLayer();
 		//		FightLayer layer = new FightLayer();
 
 		//添加图层
@@ -39,5 +41,23 @@ public class MainActivity extends Activity {
 
 		//运行场景
 		director.runWithScene(scene);
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		director.pause();
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		director.resume();
+	}
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		director.end();
 	}
 }
