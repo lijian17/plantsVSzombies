@@ -6,6 +6,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import net.dxs.plantsvszombies.R;
 import net.dxs.plantsvszombies.bean.ShowZombies;
+import net.dxs.plantsvszombies.engine.GameController;
 import net.dxs.plantsvszombies.utils.CommonUtils;
 
 import org.cocos2d.actions.base.CCAction;
@@ -26,6 +27,7 @@ import android.view.MotionEvent;
 public class FightLayer extends BaseLayer {
 
 	private static final int TAG_READY = 10;
+	public static final int TAG_CHOSE = 20;// 玩家已选择植物容器的标签
 	/** 游戏地图 **/
 	private CCTMXTiledMap gameMap;
 	/** 植物集合 **/
@@ -73,7 +75,7 @@ public class FightLayer extends BaseLayer {
 		choseSprite = CCSprite.sprite("image/fight/chose/fight_chose.png");
 		choseSprite.setAnchorPoint(0, 1);
 		choseSprite.setPosition(0, winSize.height);
-		this.addChild(choseSprite);
+		this.addChild(choseSprite, 0, TAG_CHOSE);
 
 		//植物容器二
 		chooseSprite = CCSprite.sprite("image/fight/chose/fight_choose.png");
@@ -125,43 +127,47 @@ public class FightLayer extends BaseLayer {
 	@Override
 	public boolean ccTouchesBegan(MotionEvent event) {
 		CGPoint touchPoint = this.convertTouchToNodeSpace(event);
-		if (CGRect.containsPoint(chooseSprite.getBoundingBox(), touchPoint)) {//触摸点在植物选择框内
-			if (CGRect.containsPoint(startGame.getBoundingBox(), touchPoint)) {
-				//System.out.println("一起摇滚吧");
-				if (mArr_chose.size() > 0) {
-					preGame();
-				}
-			} else {
-				for (ShowPlant plant : mArr_choose) {
-					if (mArr_chose.size() < 5) {//如果已选择植物＜5,就可以继续选择
-						if (CGRect.containsPoint(plant.getDefaultSprite().getBoundingBox(), touchPoint) && !isSel) {
-							isSel = true;//解决快速点击选择植物的Bug
-							CGPoint ccp = CGPoint.ccp(75 + mArr_chose.size() * 53, winSize.height - 65);
-							CCMoveTo moveTo = CCMoveTo.action(0.2f, ccp);
+		if (GameController.isStart) {
+			GameController.getInstance().handlerTouch(touchPoint);
+		} else {
+			if (CGRect.containsPoint(chooseSprite.getBoundingBox(), touchPoint)) {//触摸点在植物选择框内
+				if (CGRect.containsPoint(startGame.getBoundingBox(), touchPoint)) {
+					//System.out.println("一起摇滚吧");
+					if (mArr_chose.size() > 0) {
+						preGame();
+					}
+				} else {
+					for (ShowPlant plant : mArr_choose) {
+						if (mArr_chose.size() < 5) {//如果已选择植物＜5,就可以继续选择
+							if (CGRect.containsPoint(plant.getDefaultSprite().getBoundingBox(), touchPoint) && !isSel) {
+								isSel = true;//解决快速点击选择植物的Bug
+								CGPoint ccp = CGPoint.ccp(75 + mArr_chose.size() * 53, winSize.height - 65);
+								CCMoveTo moveTo = CCMoveTo.action(0.2f, ccp);
 
-							CCSequence sequence = CCSequence.actions(moveTo, CCCallFunc.action(this, "setIsSel"));
+								CCSequence sequence = CCSequence.actions(moveTo, CCCallFunc.action(this, "setIsSel"));
 
-							plant.getDefaultSprite().runAction(sequence);
-							mArr_chose.add(plant);
+								plant.getDefaultSprite().runAction(sequence);
+								mArr_chose.add(plant);
+							}
 						}
 					}
 				}
-			}
 
-		} else if (CGRect.containsPoint(choseSprite.getBoundingBox(), touchPoint)) {//触摸点在已选择植物框内
-			for (ShowPlant plant : mArr_chose) {
-				if (CGRect.containsPoint(plant.getDefaultSprite().getBoundingBox(), touchPoint)) {
-					CGPoint point = plant.getBgSprite().getPosition();
-					CCMoveTo moveTo = CCMoveTo.action(0.2f, point);
-					plant.getDefaultSprite().runAction(moveTo);
-					mArr_chose.remove(plant);
-					isDel = true;
-				} else if (isDel) {
-					CCMoveBy by = CCMoveBy.action(0.2f, CGPoint.ccp(-53, 0));
-					plant.getDefaultSprite().runAction(by);
+			} else if (CGRect.containsPoint(choseSprite.getBoundingBox(), touchPoint)) {//触摸点在已选择植物框内
+				for (ShowPlant plant : mArr_chose) {
+					if (CGRect.containsPoint(plant.getDefaultSprite().getBoundingBox(), touchPoint)) {
+						CGPoint point = plant.getBgSprite().getPosition();
+						CCMoveTo moveTo = CCMoveTo.action(0.2f, point);
+						plant.getDefaultSprite().runAction(moveTo);
+						mArr_chose.remove(plant);
+						isDel = true;
+					} else if (isDel) {
+						CCMoveBy by = CCMoveBy.action(0.2f, CGPoint.ccp(-53, 0));
+						plant.getDefaultSprite().runAction(by);
+					}
 				}
+				isDel = false;
 			}
-			isDel = false;
 		}
 		return super.ccTouchesBegan(event);
 	}
@@ -205,8 +211,8 @@ public class FightLayer extends BaseLayer {
 		this.addChild(ready, 0, TAG_READY);
 
 		CCAction animate = CommonUtils.animate("image/fight/startready_%02d.png", 3, false, 0.5f);
-		CCSequence.actions((CCFiniteTimeAction) animate, CCCallFunc.action(this, "startGame"));
-		ready.runAction(animate);
+		CCSequence sequence = CCSequence.actions((CCFiniteTimeAction) animate, CCCallFunc.action(this, "startGame"));
+		ready.runAction(sequence);
 	}
 
 	/**
@@ -216,6 +222,9 @@ public class FightLayer extends BaseLayer {
 		this.getChildByTag(TAG_READY).removeSelf();
 		this.setIsTouchEnabled(true);
 		soundEngine.playSound(CCDirector.theApp, R.raw.day, true);
+
+		GameController controller = GameController.getInstance();
+		controller.start(gameMap, mArr_chose);
 	}
 
 	/**
