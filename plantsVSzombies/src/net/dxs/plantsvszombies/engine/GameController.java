@@ -80,7 +80,7 @@ public class GameController {
 		loadRoad();
 		//addZombies();
 		//添加僵尸,每隔5s调用一次方法,被调用的方法必须带float参数
-		CCScheduler.sharedScheduler().schedule("addZombies", this, 1, false);
+		CCScheduler.sharedScheduler().schedule("addZombies", this, 5, false);
 		// 添加植物
 		loadPlantPoint();
 
